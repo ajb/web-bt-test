@@ -1,74 +1,47 @@
 document.getElementById('connect').addEventListener('click', connect)
 document.getElementById('send').addEventListener('click', send)
 
-var strToWrite = (
-  '001g' +
-  '002g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '001g' +
-  '611g' +
-  '511g'
-);
+var numLeds = 50;
+var htmlStr = '';
 
-var valToWrite = new TextEncoder("utf-8").encode(strToWrite);
+for (var i = 0; i < numLeds; i++) {
+  htmlStr += `
+    <div>
+    ${i}:
+    <select>
+      <option value=''>Off</option>
+      <option value='r'>R</option>
+      <option value='g'>G</option>
+      <option value='b'>B</option>
+    </select>
+  </div>
+  `
+
+  document.getElementById('selects').innerHTML = htmlStr;
+}
+
 
 var characteristic;
 
-// function str2ab(str) {
-//   var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
-//   var bufView = new Uint16Array(buf);
-//   for (var i = 0, strLen = str.length; i < strLen; i++) {
-//     bufView[i] = str.charCodeAt(i);
-//   }
-//   return buf;
-// }
-//
-// function hexToArrayBuffer (hex) {
-//   if (typeof hex !== 'string') {
-//     throw new TypeError('Expected input to be a string')
-//   }
-//
-//   if ((hex.length % 2) !== 0) {
-//     throw new RangeError('Expected string to be an even number of characters')
-//   }
-//
-//   var view = new Uint8Array(hex.length / 2)
-//
-//   for (var i = 0; i < hex.length; i += 2) {
-//     view[i / 2] = parseInt(hex.substring(i, i + 2), 16)
-//   }
-//
-//   return view.buffer
-// }
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function calculateMessageString() {
+  var str = ''
+
+  var selects = document.getElementsByTagName('select');
+
+  for (var i = 0; i < selects.length; i++) {
+    if (selects[i].value) {
+      str = str + pad(i, 3) + selects[i].value
+    }
+  }
+
+  return str
+}
 
 async function connect() {
   const device = await navigator.bluetooth.requestDevice({
@@ -81,21 +54,8 @@ async function connect() {
 }
 
 async function send() {
-  console.log('writing...')
+  var valToWrite = new TextEncoder("utf-8").encode(calculateMessageString());
+  console.log('Writing...', valToWrite)
   await characteristic.writeValue(valToWrite)
-  // await characteristic.writeValue(hexToArrayBuffer('0x1F4'))
   console.log('done')
-  // characteristic.writeValue(hexToArrayBuffer('0x05'))
-  // characteristic.writeValue(hexToArrayBuffer('0x06'))
-  // characteristic.writeValue(hexToArrayBuffer('0x07'))
-  // characteristic.writeValue(hexToArrayBuffer('0x08'))
-  // characteristic.writeValue(hexToArrayBuffer('0x09'))
-  // characteristic.writeValue(hexToArrayBuffer('0x0A'))
-  // characteristic.writeValue(hexToArrayBuffer('0x0B'))
-  // characteristic.writeValue(hexToArrayBuffer('0x0C'))
-  // characteristic.writeValue(hexToArrayBuffer('0x0D'))
-  // characteristic.writeValue(hexToArrayBuffer('0x0E'))
-  // characteristic.writeValue(hexToArrayBuffer('0x0F'))
 }
-
-console.log('Will write:', valToWrite)
